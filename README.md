@@ -28,17 +28,20 @@ The quick brown fox jumped over the lazy dog...
 Initializing the ```Bytes``` class with this byte array, a ```chunkSize``` of ```24``` and a sliding window of ```8``` would result in the following:
 
 ```
+using SlidingWindow;
+
 string strData = "The quick brown fox jumped over the lazy dog..."
 byte[] byteData = Encoding.UTF8.GetBytes(strData);
 Bytes slidingWindow = new Bytes(byteData, 24, 8);
 
 int chunks = slidingWindow.ChunkCount();  // 4
+byte[] chunk = null;
 
 bool finalChunk = false;
-GetNextChunk(out finalChunk);  // 'The quick brown fox jump'
-GetNextChunk(out finalChunk);  // 'k brown fox jumped over '
-GetNextChunk(out finalChunk);  // 'fox jumped over the lazy'
-GetNextChunk(out finalChunk);  // 'ed over the lazy dog...'
+chunk = slidingWindow.GetNextChunk(out finalChunk);  // 'The quick brown fox jump'
+chunk = slidingWindow.GetNextChunk(out finalChunk);  // 'k brown fox jumped over '
+chunk = slidingWindow.GetNextChunk(out finalChunk);  // 'fox jumped over the lazy'
+chunk = slidingWindow.GetNextChunk(out finalChunk);  // 'ed over the lazy dog...'
 // finalChunk would be true here
 ```
 
