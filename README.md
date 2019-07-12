@@ -36,12 +36,13 @@ Bytes slidingWindow = new Bytes(byteData, 24, 8);
 
 int chunks = slidingWindow.ChunkCount();  // 4
 byte[] chunk = null;
+int position = 0;
 
 bool finalChunk = false;
-chunk = slidingWindow.GetNextChunk(out finalChunk);  // 'The quick brown fox jump'
-chunk = slidingWindow.GetNextChunk(out finalChunk);  // 'k brown fox jumped over '
-chunk = slidingWindow.GetNextChunk(out finalChunk);  // 'fox jumped over the lazy'
-chunk = slidingWindow.GetNextChunk(out finalChunk);  // 'ed over the lazy dog...'
+chunk = slidingWindow.GetNextChunk(out position, out finalChunk);  // 'The quick brown fox jump'
+chunk = slidingWindow.GetNextChunk(out position, out finalChunk);  // 'k brown fox jumped over '
+chunk = slidingWindow.GetNextChunk(out position, out finalChunk);  // 'fox jumped over the lazy'
+chunk = slidingWindow.GetNextChunk(out position, out finalChunk);  // 'ed over the lazy dog...'
 // finalChunk would be true here
 ```
 
@@ -50,6 +51,8 @@ chunk = slidingWindow.GetNextChunk(out finalChunk);  // 'ed over the lazy dog...
 ## New in v1.0.x
 
 - Initial release with support for byte arrays.
+- Added support for net452.
+- Added out param for position at which the chunk starts from the source byte array.
 
 ## Version History
 

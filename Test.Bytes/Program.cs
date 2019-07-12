@@ -34,8 +34,9 @@ namespace Test
                 while (true)
                 {
                     bool finalChunk = false;
-                    bytes = _Bytes.GetNextChunk(out finalChunk);
-                    Console.WriteLine("Chunk " + chunkCount + " [" + bytes.Length + " bytes]: '" + Encoding.UTF8.GetString(bytes) + "'");
+                    int position = 0;
+                    bytes = _Bytes.GetNextChunk(out position, out finalChunk);
+                    Console.WriteLine("Chunk " + chunkCount + " at index " + position + " [" + bytes.Length + " bytes]: '" + Encoding.UTF8.GetString(bytes) + "'");
                     if (finalChunk) break;
                     chunkCount++;
                 }

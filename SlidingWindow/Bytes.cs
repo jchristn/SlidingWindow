@@ -74,9 +74,10 @@ namespace SlidingWindow
         /// Chunks of size 'chunkSize' will be returned, unless fewer bytes remain.
         /// The final chunk will be of the remaining size.
         /// </summary>
+        /// <param name="position">Indicates the starting position of the chunk in the byte array.</param>
         /// <param name="finalChunk">Indicates if the chunk retrieved is the final chunk.</param>
         /// <returns>Byte array containing chunk data.</returns>
-        public byte[] GetNextChunk(out bool finalChunk)
+        public byte[] GetNextChunk(out int position, out bool finalChunk)
         {
             finalChunk = false;
             byte[] ret = new byte[_ChunkSize];
@@ -94,6 +95,7 @@ namespace SlidingWindow
                     (_Data.Length - (_NextStartPosition + _ChunkSize)) + 
                     " bytes remaining]");
 
+                position = _NextStartPosition;
                 _NextStartPosition += _ShiftSize;
                 return ret;
 
@@ -112,6 +114,7 @@ namespace SlidingWindow
                     "Returning final chunk from position " + _NextStartPosition +
                     " of size " + _ChunkSize);
 
+                position = _NextStartPosition;
                 _NextStartPosition = _Data.Length + 1;
                 finalChunk = true;
                 return ret;
@@ -123,6 +126,7 @@ namespace SlidingWindow
                 #region No-More-Data
 
                 Log("End of data");
+                position = -1;
                 return null;
 
                 #endregion
