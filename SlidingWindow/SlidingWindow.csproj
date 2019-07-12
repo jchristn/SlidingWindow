@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Joel Christner</Authors>
+    <Company>Joel Christner</Company>
+    <Description>SlidingWindow provides an interface to retrieve chunks from a byte array using a sliding window.</Description>
+    <Copyright>(c)2019 Joel Christner</Copyright>
+    <PackageLicenseUrl>https://github.com/jchristn/slidingwindow/blob/master/LICENSE.txt</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/jchristn/slidingwindow</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/jchristn/slidingwindow</RepositoryUrl>
+    <RepositoryType>Github</RepositoryType>
+    <PackageTags>sliding window chunk byte array bytes</PackageTags>
+    <PackageReleaseNotes>Initial release with support for byte arrays.</PackageReleaseNotes>
+    <PackageIconUrl>https://raw.githubusercontent.com/jchristn/slidingwindow/master/assets/icon.ico</PackageIconUrl>
+  </PropertyGroup>
+
+</Project>
