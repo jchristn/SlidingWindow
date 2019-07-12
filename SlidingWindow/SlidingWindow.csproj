@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Joel Christner</Authors>
     <Company>Joel Christner</Company>
@@ -12,8 +12,9 @@
     <RepositoryUrl>https://github.com/jchristn/slidingwindow</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>sliding window chunk byte array bytes</PackageTags>
-    <PackageReleaseNotes>Initial release with support for byte arrays.</PackageReleaseNotes>
+    <PackageReleaseNotes>Added support for net452.</PackageReleaseNotes>
     <PackageIconUrl>https://raw.githubusercontent.com/jchristn/slidingwindow/master/assets/icon.ico</PackageIconUrl>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
 </Project>
