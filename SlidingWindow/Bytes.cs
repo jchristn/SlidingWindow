@@ -103,7 +103,7 @@ namespace SlidingWindow
             }
             else if (_NextStartPosition < _Data.Length)
             {
-                #region Partial-Chunk
+                #region Final-Chunk
 
                 int _BytesRemaining = _Data.Length - _NextStartPosition;
                 ret = new byte[_BytesRemaining];
@@ -112,7 +112,7 @@ namespace SlidingWindow
 
                 Log(
                     "Returning final chunk from position " + _NextStartPosition +
-                    " of size " + _ChunkSize);
+                    " of size " + ret.Length);
 
                 position = _NextStartPosition;
                 _NextStartPosition = _Data.Length + 1;
@@ -127,6 +127,7 @@ namespace SlidingWindow
 
                 Log("End of data");
                 position = -1;
+                finalChunk = true;
                 return null;
 
                 #endregion

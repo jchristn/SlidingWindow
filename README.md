@@ -52,8 +52,9 @@ chunk = slidingWindow.GetNextChunk(out position, out finalChunk);  // 'ed over t
 
 - Initial release with support for byte arrays.
 - Added support for net452.
-- Added out param for position at which the chunk starts from the source byte array.
-
+- Added support for streams where the content length is known.
+- Added out param for position at which the chunk starts from the source byte array or stream.
+ 
 ## Version History
 
 Changes made from previous versions will be listed here.
