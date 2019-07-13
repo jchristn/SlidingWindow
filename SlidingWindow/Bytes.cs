@@ -9,12 +9,7 @@ namespace SlidingWindow
     public class Bytes
     {
         #region Public-Members
-
-        /// <summary>
-        /// Enable or disable logging to the console.
-        /// </summary>
-        public bool ConsoleDebug = false;
-
+         
         #endregion
 
         #region Private-Members
@@ -22,7 +17,9 @@ namespace SlidingWindow
         private byte[] _Data = null;
         private int _ChunkSize = 0;
         private int _ShiftSize = 0;
+         
         private int _NextStartPosition = 0;
+        private int _NextEndPosition = 0;
 
         #endregion
 
@@ -48,8 +45,9 @@ namespace SlidingWindow
 
             _ChunkSize = chunkSize;
             _ShiftSize = shiftSize;
-
-            _NextStartPosition = 0;  
+             
+            _NextStartPosition = 0;
+            _NextEndPosition = _NextStartPosition + _ChunkSize;
         }
 
         #endregion
@@ -77,72 +75,117 @@ namespace SlidingWindow
         /// <param name="position">Indicates the starting position of the chunk in the byte array.</param>
         /// <param name="finalChunk">Indicates if the chunk retrieved is the final chunk.</param>
         /// <returns>Byte array containing chunk data.</returns>
-        public byte[] GetNextChunk(out int position, out bool finalChunk)
+        public byte[] GetNextChunk(out long position, out byte[] newData, out bool finalChunk)
         {
-            finalChunk = false;
-            byte[] ret = new byte[_ChunkSize];
+            position = -1;
+            byte[] ret = null;
 
-            if ((_NextStartPosition + _ChunkSize) <= _Data.Length)
+            if (_NextStartPosition == 0)
             {
-                #region Full-Chunk
+                #region First-Chunk
 
-                Buffer.BlockCopy(_Data, _NextStartPosition, ret, 0, _ChunkSize); 
+                if (_ChunkSize > _Data.Length)
+                {
+                    #region Only-Chunk
 
-                Log(
-                    "Returning chunk from position " + _NextStartPosition + 
-                    " of size " + _ChunkSize + 
-                    " [" + 
-                    (_Data.Length - (_NextStartPosition + _ChunkSize)) + 
-                    " bytes remaining]");
+                    ret = new byte[_Data.Length];
+                    newData = new byte[_Data.Length];
+                    Buffer.BlockCopy(_Data, 0, ret, 0, _Data.Length);
+                    Buffer.BlockCopy(_Data, 0, newData, 0, _Data.Length);
+                    finalChunk = true;
+                    position = 0;
+                    _NextStartPosition += _ShiftSize;
+                    _NextEndPosition += _ShiftSize;
+                    return ret;
 
-                position = _NextStartPosition;
-                _NextStartPosition += _ShiftSize;
-                return ret;
+                    #endregion
+                }
+                else
+                {
+                    #region Full-Chunk
 
-                #endregion
-            }
-            else if (_NextStartPosition < _Data.Length)
-            {
-                #region Final-Chunk
+                    ret = new byte[_ChunkSize];
+                    newData = new byte[_ChunkSize];
+                    Buffer.BlockCopy(_Data, _NextStartPosition, ret, 0, _ChunkSize);
+                    Buffer.BlockCopy(_Data, _NextStartPosition, newData, 0, _ChunkSize);
+                    finalChunk = false;
+                    position = 0;
+                    _NextStartPosition += _ShiftSize;
+                    _NextEndPosition += _ShiftSize;
+                    return ret;
 
-                int _BytesRemaining = _Data.Length - _NextStartPosition;
-                ret = new byte[_BytesRemaining];
-                Buffer.BlockCopy(_Data, _NextStartPosition, ret, 0, _BytesRemaining);
-                _BytesRemaining -= _BytesRemaining;
-
-                Log(
-                    "Returning final chunk from position " + _NextStartPosition +
-                    " of size " + ret.Length);
-
-                position = _NextStartPosition;
-                _NextStartPosition = _Data.Length + 1;
-                finalChunk = true;
-                return ret;
+                    #endregion
+                }
 
                 #endregion
             }
             else
             {
-                #region No-More-Data
+                #region Subsequent-Chunk
 
-                Log("End of data");
-                position = -1;
-                finalChunk = true;
-                return null;
+                if (_NextStartPosition >= _Data.Length)
+                {
+                    #region End
+
+                    ret = null;
+                    newData = null;
+                    finalChunk = true;
+                    position = -1;
+                    return ret;
+
+                    #endregion
+                }
+                else
+                {
+                    if (_NextEndPosition < _Data.Length)
+                    {
+                        #region Full-Chunk
+
+                        ret = new byte[_ChunkSize];
+                        Buffer.BlockCopy(_Data, _NextStartPosition, ret, 0, _ChunkSize);
+
+                        newData = new byte[_ShiftSize];
+                        int newDataStart = _NextEndPosition - _ShiftSize;
+                        Buffer.BlockCopy(_Data, newDataStart, newData, 0, _ShiftSize);
+                        finalChunk = false;
+                        position = _NextStartPosition;
+                        _NextStartPosition += _ShiftSize;
+                        _NextEndPosition += _ShiftSize;
+
+                        if (_NextStartPosition >= _Data.Length) finalChunk = true;
+
+                        return ret;
+
+                        #endregion
+                    }
+                    else
+                    {
+                        #region Partial-Chunk-and-End
+
+                        int windowLength = _Data.Length - _NextStartPosition; 
+                        position = _Data.Length - (_Data.Length - _NextStartPosition); 
+
+                        ret = new byte[windowLength];
+                        Buffer.BlockCopy(_Data, (int)position, ret, 0, windowLength);
+
+                        int newDataLength = _Data.Length - (_NextEndPosition - _ShiftSize); 
+                        int newDataPosition = _Data.Length - newDataLength; 
+                        newData = new byte[newDataLength];
+                        Buffer.BlockCopy(_Data, newDataPosition, newData, 0, newDataLength);
+
+                        finalChunk = true;
+                        _NextStartPosition += _ShiftSize;
+                        _NextEndPosition += _ShiftSize;
+                        return ret;
+
+                        #endregion
+                    }
+                }
 
                 #endregion
             } 
         }
 
-        #endregion
-
-        #region Private-Methods
-
-        private void Log(string msg)
-        {
-            if (ConsoleDebug) Console.WriteLine(msg);
-        }
-
-        #endregion
+        #endregion 
     }
 }

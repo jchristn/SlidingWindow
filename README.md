@@ -35,15 +35,35 @@ byte[] byteData = Encoding.UTF8.GetBytes(strData);
 Bytes slidingWindow = new Bytes(byteData, 24, 8);
 
 int chunks = slidingWindow.ChunkCount();  // 4
-byte[] chunk = null;
-int position = 0;
 
-bool finalChunk = false;
-chunk = slidingWindow.GetNextChunk(out position, out finalChunk);  // 'The quick brown fox jump'
-chunk = slidingWindow.GetNextChunk(out position, out finalChunk);  // 'k brown fox jumped over '
-chunk = slidingWindow.GetNextChunk(out position, out finalChunk);  // 'fox jumped over the lazy'
-chunk = slidingWindow.GetNextChunk(out position, out finalChunk);  // 'ed over the lazy dog...'
-// finalChunk would be true here
+int position = 0;         // zero-based index of current chunk
+byte[] chunk = null;      // all of the data in the window
+byte[] newData = null;    // new data retrieved from the previous chunk
+bool finalChunk = false;  // whether or not it's the last chunk
+
+chunk = slidingWindow.GetNextChunk(out position, out newData, out finalChunk);  
+// position   : 0
+// chunk      : 'The quick brown fox jump'
+// newData    : 'The quick brown fox jump'
+// finalChunk : false
+
+chunk = slidingWindow.GetNextChunk(out position, out newData, out finalChunk);  
+// position   : 8
+// chunk      : 'k brown fox jumped over '
+// newData    : 'ed over '
+// finalChunk : false
+
+chunk = slidingWindow.GetNextChunk(out position, out newData, out finalChunk);  
+// position   : 16
+// chunk      : 'fox jumped over the lazy'
+// newData    : 'the lazy'
+// finalChunk : false
+
+chunk = slidingWindow.GetNextChunk(out position, out newData, out finalChunk);  
+// position   : 24
+// chunk      : 'ed over the lazy dog...'
+// newData    : ' dog...'
+// finalChunk : true
 ```
 
 ```chunkSize``` must be greater than zero and less than the length of the supplied data, and ```shiftSize``` must be greater than zero and less than ```chunkSize```.
@@ -54,6 +74,7 @@ chunk = slidingWindow.GetNextChunk(out position, out finalChunk);  // 'ed over t
 - Added support for net452.
 - Added support for streams where the content length is known.
 - Added out param for position at which the chunk starts from the source byte array or stream.
+- Added out param for byte array containing the new data from the previous chunk included in the returned chunk.
  
 ## Version History
 

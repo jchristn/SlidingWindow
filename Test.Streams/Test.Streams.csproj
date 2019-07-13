@@ -17,6 +17,9 @@
     <None Update="SampleData\kjv.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="SampleData\small.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SampleData\zork.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
