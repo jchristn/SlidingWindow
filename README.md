@@ -78,5 +78,5 @@ chunk = slidingWindow.GetNextChunk(out position, out newData, out finalChunk);
  
 ## Version History
 
-Changes made from previous versions will be listed here.
+Please refer to CHANGELOG.md.
 

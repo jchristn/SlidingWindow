@@ -11,7 +11,62 @@ namespace SlidingWindow
     public class Streams
     {
         #region Public-Members
-         
+
+        /// <summary>
+        /// The size of a chunk.
+        /// </summary>
+        public int ChunkSize
+        {
+            get
+            {
+                return _ChunkSize;
+            }
+        }
+
+        /// <summary>
+        /// The number of bytes by which the window should be shifted.
+        /// </summary>
+        public int ShiftSize
+        {
+            get
+            {
+                return _ShiftSize;
+            }
+        }
+
+        /// <summary>
+        /// Ordinal position for the next start.
+        /// </summary>
+        public long NextStartPosition
+        {
+            get
+            {
+                return _NextStartPosition;
+            }
+        }
+
+        /// <summary>
+        /// Number of bytes remaining.
+        /// </summary>
+        public long BytesRemaining
+        {
+            get
+            {
+                return _BytesRemaining;
+            }
+        }
+
+        /// <summary>
+        /// The previous chunk's data.
+        /// </summary>
+        public byte[] PreviousChunk
+        {
+            get
+            {
+                return _PreviousChunk;
+            }
+        }
+
         #endregion
 
         #region Private-Members
@@ -80,6 +135,7 @@ namespace SlidingWindow
         /// The final chunk will be of the remaining size.
         /// </summary>
         /// <param name="position">Indicates the starting position of the chunk in the byte array.</param>
+        /// <param name="newData">Removing data from the previous chunk, new data found that was included in this chunk.</param>
         /// <param name="finalChunk">Indicates if the chunk retrieved is the final chunk.</param>
         /// <returns>Byte array containing chunk data.</returns>
         public byte[] GetNextChunk(out long position, out byte[] newData, out bool finalChunk)
@@ -224,10 +280,56 @@ namespace SlidingWindow
             } 
         }
 
+        /// <summary>
+        /// Advance to the position starting after the end of the previous chunk.  
+        /// Calling GetNextChunk() will then return a chunk full of new data.
+        /// </summary>
+        public void AdvanceToNewChunk()
+        {
+            if (_PreviousChunk == null || _NextStartPosition == 0) return;
+
+            _PreviousChunk = null;  
+
+            /*
+            Console.WriteLine("Original values");
+            Console.WriteLine("  Next start             : " + _NextStartPosition);
+            Console.WriteLine("  Bytes remaining        : " + _BytesRemaining);
+             */
+
+            long previousStart = _NextStartPosition - _ShiftSize;
+            long nextStart = previousStart + _ChunkSize;
+            long bytesUntilNextStart = nextStart - previousStart;
+
+            /*
+            Console.WriteLine("Calculated values");
+            Console.WriteLine("  Previous start         : " + previousStart);
+            Console.WriteLine("  Next start             : " + nextStart);
+            Console.WriteLine("  Bytes until next start : " + bytesUntilNextStart);
+             */
+
+            if (bytesUntilNextStart < _BytesRemaining)
+            {  
+                _NextStartPosition = nextStart;
+            }
+            else
+            { 
+                _BytesRemaining = 0;
+                _NextStartPosition += _ContentLength;
+            }
+                 
+            /*
+            Console.WriteLine("New values");
+            Console.WriteLine("  Next start             : " + _NextStartPosition);
+            Console.WriteLine("  Bytes remaining        : " + _BytesRemaining);  
+             */
+
+            return;
+        } 
+
         #endregion
 
         #region Private-Methods
-         
+
         private byte[] ReadBytesFromStream(Stream stream, long count, out int bytesRead)
         {
             bytesRead = 0;

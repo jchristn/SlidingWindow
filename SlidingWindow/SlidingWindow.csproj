@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
@@ -7,14 +7,26 @@
     <Company>Joel Christner</Company>
     <Description>SlidingWindow provides an interface to retrieve chunks from a byte array using a sliding window.</Description>
     <Copyright>(c)2019 Joel Christner</Copyright>
-    <PackageLicenseUrl>https://github.com/jchristn/slidingwindow/blob/master/LICENSE.txt</PackageLicenseUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/jchristn/slidingwindow</PackageProjectUrl>
     <RepositoryUrl>https://github.com/jchristn/slidingwindow</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>sliding window chunk byte array bytes</PackageTags>
-    <PackageReleaseNotes>Added out newData parameter.</PackageReleaseNotes>
+    <PackageReleaseNotes>Added AdvanceToNewChunk() method.</PackageReleaseNotes>
     <PackageIconUrl>https://raw.githubusercontent.com/jchristn/slidingwindow/master/assets/icon.ico</PackageIconUrl>
-    <Version>1.0.4</Version>
+    <Version>1.0.6</Version>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
+    <DocumentationFile>C:\Code\Misc\SlidingWindow\SlidingWindow\SlidingWindow.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE.md">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>

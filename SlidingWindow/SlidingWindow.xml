@@ -1,0 +1,135 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>SlidingWindow</name>
+    </assembly>
+    <members>
+        <member name="T:SlidingWindow.Bytes">
+            <summary>
+            Perform a sliding window operation over a byte array.
+            </summary>
+        </member>
+        <member name="P:SlidingWindow.Bytes.Data">
+            <summary>
+            Byte array data.
+            </summary>
+        </member>
+        <member name="P:SlidingWindow.Bytes.ChunkSize">
+            <summary>
+            The size of a chunk.
+            </summary>
+        </member>
+        <member name="P:SlidingWindow.Bytes.ShiftSize">
+            <summary>
+            The number of bytes by which the window should be shifted.
+            </summary>
+        </member>
+        <member name="P:SlidingWindow.Bytes.NextStartPosition">
+            <summary>
+            Ordinal position for the next start.
+            </summary>
+        </member>
+        <member name="P:SlidingWindow.Bytes.NextEndPosition">
+            <summary>
+            Ordinal position of the next end.
+            </summary>
+        </member>
+        <member name="P:SlidingWindow.Bytes.BytesRemaining">
+            <summary>
+            Number of bytes remaining.
+            </summary>
+        </member>
+        <member name="M:SlidingWindow.Bytes.#ctor(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Instantiate the object.
+            </summary>
+            <param name="data">Byte data to chunk using a sliding window.</param>
+            <param name="chunkSize">Size of the data chunks to return.</param>
+            <param name="shiftSize">Number of bytes the sliding window should shift on each call to GetNextChunk().</param>
+        </member>
+        <member name="M:SlidingWindow.Bytes.ChunkCount">
+            <summary>
+            Retrieve the total number of chunks that will be returned.
+            </summary>
+            <returns>Number of chunks that will be returned.</returns>
+        </member>
+        <member name="M:SlidingWindow.Bytes.GetNextChunk(System.Int64@,System.Byte[]@,System.Boolean@)">
+            <summary>
+            Retrieve the next chunk.
+            Chunks of size 'chunkSize' will be returned, unless fewer bytes remain.
+            The final chunk will be of the remaining size.
+            </summary>
+            <param name="position">Indicates the starting position of the chunk in the byte array.</param>
+            <param name="newData">Removing data from the previous chunk, new data found that was included in this chunk.</param>
+            <param name="finalChunk">Indicates if the chunk retrieved is the final chunk.</param>
+            <returns>Byte array containing chunk data.</returns>
+        </member>
+        <member name="M:SlidingWindow.Bytes.AdvanceToNewChunk">
+            <summary>
+            Advance processing to the next new chunk.
+            </summary>
+        </member>
+        <member name="T:SlidingWindow.Streams">
+            <summary>
+            Perform a sliding window operation over data read from a stream.
+            </summary>
+        </member>
+        <member name="P:SlidingWindow.Streams.ChunkSize">
+            <summary>
+            The size of a chunk.
+            </summary>
+        </member>
+        <member name="P:SlidingWindow.Streams.ShiftSize">
+            <summary>
+            The number of bytes by which the window should be shifted.
+            </summary>
+        </member>
+        <member name="P:SlidingWindow.Streams.NextStartPosition">
+            <summary>
+            Ordinal position for the next start.
+            </summary>
+        </member>
+        <member name="P:SlidingWindow.Streams.BytesRemaining">
+            <summary>
+            Number of bytes remaining.
+            </summary>
+        </member>
+        <member name="P:SlidingWindow.Streams.PreviousChunk">
+            <summary>
+            The previous chunk's data.
+            </summary>
+        </member>
+        <member name="M:SlidingWindow.Streams.#ctor(System.IO.Stream,System.Int64,System.Int32,System.Int32)">
+            <summary>
+            Instantiate the object.
+            </summary>
+            <param name="stream">Stream containing data to chunk using a sliding window.</param>
+            <param name="contentLength">The number of bytes to expect within the stream.</param>
+            <param name="chunkSize">Size of the data chunks to return.</param>
+            <param name="shiftSize">Number of bytes the sliding window should shift on each call to GetNextChunk().</param>
+        </member>
+        <member name="M:SlidingWindow.Streams.ChunkCount">
+            <summary>
+            Retrieve the total number of chunks that will be returned.
+            </summary>
+            <returns>Number of chunks that will be returned.</returns>
+        </member>
+        <member name="M:SlidingWindow.Streams.GetNextChunk(System.Int64@,System.Byte[]@,System.Boolean@)">
+            <summary>
+            Retrieve the next chunk.
+            Chunks of size 'chunkSize' will be returned, unless fewer bytes remain.
+            The final chunk will be of the remaining size.
+            </summary>
+            <param name="position">Indicates the starting position of the chunk in the byte array.</param>
+            <param name="newData">Removing data from the previous chunk, new data found that was included in this chunk.</param>
+            <param name="finalChunk">Indicates if the chunk retrieved is the final chunk.</param>
+            <returns>Byte array containing chunk data.</returns>
+        </member>
+        <member name="M:SlidingWindow.Streams.AdvanceToNewChunk">
+            <summary>
+            Advance to the position starting after the end of the previous chunk.  
+            Calling GetNextChunk() will then return a chunk full of new data.
+            </summary>
+        </member>
+    </members>
+</doc>

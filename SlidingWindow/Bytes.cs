@@ -9,7 +9,74 @@ namespace SlidingWindow
     public class Bytes
     {
         #region Public-Members
-         
+
+        /// <summary>
+        /// Byte array data.
+        /// </summary>
+        public byte[] Data
+        {
+            get
+            {
+                return _Data;
+            }
+        }
+
+        /// <summary>
+        /// The size of a chunk.
+        /// </summary>
+        public int ChunkSize
+        {
+            get
+            {
+                return _ChunkSize;
+            }
+        }
+
+        /// <summary>
+        /// The number of bytes by which the window should be shifted.
+        /// </summary>
+        public int ShiftSize
+        {
+            get
+            {
+                return _ShiftSize;
+            }
+        }
+
+        /// <summary>
+        /// Ordinal position for the next start.
+        /// </summary>
+        public int NextStartPosition
+        {
+            get
+            {
+                return _NextStartPosition;
+            }
+        }
+
+        /// <summary>
+        /// Ordinal position of the next end.
+        /// </summary>
+        public int NextEndPosition
+        {
+            get
+            {
+                return _NextEndPosition;
+            }
+        }
+
+        /// <summary>
+        /// Number of bytes remaining.
+        /// </summary>
+        public int BytesRemaining
+        {
+            get
+            {
+                if (_NextStartPosition == 0) return _Data.Length;
+                return _Data.Length - (_NextEndPosition - _ShiftSize);
+            }
+        }
+
         #endregion
 
         #region Private-Members
@@ -73,6 +140,7 @@ namespace SlidingWindow
         /// The final chunk will be of the remaining size.
         /// </summary>
         /// <param name="position">Indicates the starting position of the chunk in the byte array.</param>
+        /// <param name="newData">Removing data from the previous chunk, new data found that was included in this chunk.</param>
         /// <param name="finalChunk">Indicates if the chunk retrieved is the final chunk.</param>
         /// <returns>Byte array containing chunk data.</returns>
         public byte[] GetNextChunk(out long position, out byte[] newData, out bool finalChunk)
@@ -184,6 +252,25 @@ namespace SlidingWindow
 
                 #endregion
             } 
+        }
+
+        /// <summary>
+        /// Advance processing to the next new chunk.
+        /// </summary>
+        public void AdvanceToNewChunk()
+        {
+            if (_NextStartPosition == 0) return;
+
+            int nextStartPosition = _NextStartPosition;
+            int nextEndPosition = _NextEndPosition;
+
+            int prevChunkStartPosition = _NextStartPosition - _ShiftSize;
+            int prevChunkEndPosition = _NextEndPosition - _ShiftSize;
+
+            _NextStartPosition = prevChunkStartPosition + _ChunkSize;
+            _NextEndPosition = prevChunkEndPosition + _ChunkSize;
+
+            return;
         }
 
         #endregion 
