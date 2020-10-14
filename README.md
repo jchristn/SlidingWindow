@@ -27,7 +27,7 @@ The quick brown fox jumped over the lazy dog...
 
 Initializing the ```Bytes``` class with this byte array, a ```chunkSize``` of ```24``` and a sliding window of ```8``` would result in the following:
 
-```
+```csharp
 using SlidingWindow;
 
 string strData = "The quick brown fox jumped over the lazy dog..."
