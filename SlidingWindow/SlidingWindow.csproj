@@ -1,20 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.0;netcoreapp3.1;net452;net5.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;netcoreapp3.1;net452;net5.0;net6.0</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Joel Christner</Authors>
     <Company>Joel Christner</Company>
     <Description>SlidingWindow provides an interface to retrieve chunks from a byte array using a sliding window.</Description>
-    <Copyright>(c)2019 Joel Christner</Copyright>
+    <Copyright>(c)2021 Joel Christner</Copyright>
     <PackageLicenseUrl></PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/jchristn/slidingwindow</PackageProjectUrl>
     <RepositoryUrl>https://github.com/jchristn/slidingwindow</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>sliding window chunk byte array bytes</PackageTags>
-    <PackageReleaseNotes>Added AdvanceToNewChunk() method.</PackageReleaseNotes>
+    <PackageReleaseNotes>.NET 6 support.</PackageReleaseNotes>
     <PackageIconUrl>https://raw.githubusercontent.com/jchristn/slidingwindow/master/assets/icon.ico</PackageIconUrl>
-    <Version>1.0.7</Version>
+    <Version>1.0.7.1</Version>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
   </PropertyGroup>
 

@@ -88,7 +88,7 @@ namespace Test
                         {
                             using (FileStream outFs = new FileStream(outFile, FileMode.Append))
                             {
-                                outFs.Write(newData);
+                                outFs.Write(newData, 0, newData.Length);
                             }
                         }
 
