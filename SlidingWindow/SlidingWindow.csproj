@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;netcoreapp3.1;net452;net5.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net8.0;net10.0</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Joel Christner</Authors>
     <Company>Joel Christner</Company>
@@ -12,18 +12,19 @@
     <RepositoryUrl>https://github.com/jchristn/slidingwindow</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>sliding window chunk byte array bytes</PackageTags>
-    <PackageReleaseNotes>.NET 6 support.</PackageReleaseNotes>
-    <PackageIconUrl>https://raw.githubusercontent.com/jchristn/slidingwindow/master/assets/icon.ico</PackageIconUrl>
-    <Version>1.0.7.1</Version>
+    <PackageReleaseNotes>Retargeted to netstandard2.0, netstandard2.1, net8.0, and net10.0.</PackageReleaseNotes>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageIcon>icon.png</PackageIcon>
+    <Version>1.0.8</Version>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
-    <DocumentationFile>C:\Code\Misc\SlidingWindow\SlidingWindow\SlidingWindow.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="..\LICENSE.md">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="..\assets\icon.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
