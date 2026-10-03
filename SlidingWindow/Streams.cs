@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace SlidingWindow
 {
@@ -46,7 +44,7 @@ namespace SlidingWindow
         }
 
         /// <summary>
-        /// Number of bytes remaining.
+        /// Number of bytes within the content length that have not yet been read from the stream.
         /// </summary>
         public long BytesRemaining
         {
@@ -57,7 +55,7 @@ namespace SlidingWindow
         }
 
         /// <summary>
-        /// The previous chunk's data.
+        /// The previous chunk's data, or null if no chunk has been retrieved or AdvanceToNewChunk() was called.
         /// </summary>
         public byte[] PreviousChunk
         {
@@ -99,7 +97,7 @@ namespace SlidingWindow
             if (chunkSize < 1) throw new ArgumentException("Chunk size must be at least one.");
             if (chunkSize > contentLength) throw new ArgumentException("Chunk size must not exceed content length.");
             if (shiftSize < 1) throw new ArgumentException("Shift size must be at least one.");
-            if (shiftSize > chunkSize) throw new ArgumentException("Shift size must be less than chunk size.");
+            if (shiftSize > chunkSize) throw new ArgumentException("Shift size must not exceed chunk size.");
 
             _Stream = stream;
             _ContentLength = contentLength;
@@ -133,251 +131,81 @@ namespace SlidingWindow
         /// Retrieve the next chunk.
         /// Chunks of size 'chunkSize' will be returned, unless fewer bytes remain.
         /// The final chunk will be of the remaining size.
+        /// Once the final chunk has been returned, subsequent calls return null.
         /// </summary>
-        /// <param name="position">Indicates the starting position of the chunk in the byte array.</param>
-        /// <param name="newData">Removing data from the previous chunk, new data found that was included in this chunk.</param>
-        /// <param name="finalChunk">Indicates if the chunk retrieved is the final chunk.</param>
-        /// <returns>Byte array containing chunk data.</returns>
+        /// <param name="position">Indicates the starting position of the chunk in the stream, or -1 if no data remains.</param>
+        /// <param name="newData">Data included in this chunk that was not included in any previously returned chunk, or null if no data remains.</param>
+        /// <param name="finalChunk">Indicates if the chunk retrieved is the final chunk, or if no data remains.</param>
+        /// <returns>Byte array containing chunk data, or null if no data remains.</returns>
+        /// <exception cref="EndOfStreamException">The stream ended before the specified content length was read.</exception>
+        /// <exception cref="ObjectDisposedException">The stream has been disposed.</exception>
         public byte[] GetNextChunk(out long position, out byte[] newData, out bool finalChunk)
         {
             position = -1;
             newData = null;
-            finalChunk = false;
-            int bytesRead = 0;
+            finalChunk = true;
 
-            if (_BytesRemaining < 1)
+            if (_BytesRemaining < 1) return null;
+
+            long consumed = _ContentLength - _BytesRemaining;
+            long start = _NextStartPosition;
+            long end = Math.Min(start + _ChunkSize, _ContentLength);
+
+            byte[] ret = new byte[end - start];
+
+            int retained = 0;
+            if (_PreviousChunk != null && start < consumed)
             {
-                finalChunk = true;
-                return null;
+                retained = (int)(consumed - start);
+                Buffer.BlockCopy(_PreviousChunk, _PreviousChunk.Length - retained, ret, 0, retained);
             }
 
-            if (_BytesRemaining >= _ChunkSize)
-            {
-                #region Full-Chunk
+            int bytesToRead = ret.Length - retained;
+            ReadExactly(_Stream, ret, retained, bytesToRead);
+            _BytesRemaining -= bytesToRead;
 
-                if (_PreviousChunk == null)
-                {
-                    newData = ReadBytesFromStream(_Stream, _ChunkSize, out bytesRead);
-                    _PreviousChunk = new byte[newData.Length];
-                    Buffer.BlockCopy(newData, 0, _PreviousChunk, 0, newData.Length);
-                }
-                else
-                {
-                    _PreviousChunk = ShiftLeft(_PreviousChunk, _ShiftSize, 0x00);
-                    newData = ReadBytesFromStream(_Stream, _ShiftSize, out bytesRead);
-                    Buffer.BlockCopy(
-                        newData, 
-                        0, 
-                        _PreviousChunk,
-                        (_ChunkSize - _ShiftSize),
-                        _ShiftSize
-                        );
-                }
+            newData = new byte[bytesToRead];
+            Buffer.BlockCopy(ret, retained, newData, 0, bytesToRead);
 
-                _BytesRemaining -= bytesRead;
-                 
-                position = _NextStartPosition;
-                _NextStartPosition += _ShiftSize;
-                return _PreviousChunk;
+            _PreviousChunk = new byte[ret.Length];
+            Buffer.BlockCopy(ret, 0, _PreviousChunk, 0, ret.Length);
 
-                #endregion
-            }
-            else if (_BytesRemaining > 0 && _BytesRemaining < _ChunkSize && _BytesRemaining >= _ShiftSize)
-            {
-                #region Full-Chunk
-                 
-                if (_PreviousChunk == null)
-                { 
-                    newData = ReadBytesFromStream(_Stream, _ChunkSize, out bytesRead);
-                    _PreviousChunk = new byte[newData.Length];
-                    Buffer.BlockCopy(newData, 0, _PreviousChunk, 0, newData.Length); 
-                }
-                else
-                { 
-                    _PreviousChunk = ShiftLeft(_PreviousChunk, _ShiftSize, 0x00);
-                    newData = ReadBytesFromStream(_Stream, _ShiftSize, out bytesRead);
-                    Buffer.BlockCopy(
-                        newData,
-                        0,
-                        _PreviousChunk,
-                        (_ChunkSize - _ShiftSize),
-                        _ShiftSize
-                        );
-                }
-
-                _BytesRemaining -= bytesRead;
-                 
-                if (_BytesRemaining < 1) finalChunk = true;
-
-                position = _NextStartPosition;
-                _NextStartPosition += _ShiftSize;
-                return _PreviousChunk;
-
-                #endregion
-            }
-            else if (_BytesRemaining > 0 && _BytesRemaining < _ChunkSize && _BytesRemaining < _ShiftSize)
-            {
-                #region Final-Chunk
-                 
-                if (_PreviousChunk == null)
-                { 
-                    newData = ReadBytesFromStream(_Stream, _BytesRemaining, out bytesRead);
-                    _PreviousChunk = new byte[_BytesRemaining];
-                    Buffer.BlockCopy(newData, 0, _PreviousChunk, 0, newData.Length); 
-                }
-                else
-                { 
-                    _PreviousChunk = ShiftLeft(_PreviousChunk, _ShiftSize, 0x00);
-                     
-                    byte[] previousChunk = new byte[(_PreviousChunk.Length - _ShiftSize)];
-                    Buffer.BlockCopy(
-                        _PreviousChunk,
-                        0,
-                        previousChunk,
-                        0,
-                        (_PreviousChunk.Length - _ShiftSize)
-                        );
-                     
-                    newData = ReadBytesFromStream(_Stream, (int)_BytesRemaining, out bytesRead);
-                      
-                    // copy the previous data
-                    Buffer.BlockCopy(
-                        previousChunk,
-                        0,
-                        _PreviousChunk,
-                        0,
-                        previousChunk.Length
-                        );
-                     
-                    // copy the new data
-                    Buffer.BlockCopy(
-                        newData,
-                        0,
-                        _PreviousChunk,
-                        previousChunk.Length,
-                        bytesRead
-                        ); 
-                }
-                 
-                _BytesRemaining -= bytesRead;
-                 
-                position = _NextStartPosition;
-                _NextStartPosition = _ContentLength + 1;
-                finalChunk = true;
-                return _PreviousChunk;
-
-                #endregion
-            }
-            else
-            {
-                #region No-More-Data
-                 
-                position = -1;
-                finalChunk = true;
-                return null;
-
-                #endregion
-            } 
+            position = start;
+            finalChunk = (end >= _ContentLength);
+            _NextStartPosition += _ShiftSize;
+            return ret;
         }
 
         /// <summary>
-        /// Advance to the position starting after the end of the previous chunk.  
+        /// Advance to the position starting after the end of the previous chunk.
         /// Calling GetNextChunk() will then return a chunk full of new data.
+        /// Has no effect if no chunk has been retrieved since construction or the last advance.
         /// </summary>
         public void AdvanceToNewChunk()
         {
-            if (_PreviousChunk == null || _NextStartPosition == 0) return;
+            if (_PreviousChunk == null) return;
 
-            _PreviousChunk = null;  
-
-            /*
-            Console.WriteLine("Original values");
-            Console.WriteLine("  Next start             : " + _NextStartPosition);
-            Console.WriteLine("  Bytes remaining        : " + _BytesRemaining);
-             */
-
-            long previousStart = _NextStartPosition - _ShiftSize;
-            long nextStart = previousStart + _ChunkSize;
-            long bytesUntilNextStart = nextStart - previousStart;
-
-            /*
-            Console.WriteLine("Calculated values");
-            Console.WriteLine("  Previous start         : " + previousStart);
-            Console.WriteLine("  Next start             : " + nextStart);
-            Console.WriteLine("  Bytes until next start : " + bytesUntilNextStart);
-             */
-
-            if (bytesUntilNextStart < _BytesRemaining)
-            {  
-                _NextStartPosition = nextStart;
-            }
-            else
-            { 
-                _BytesRemaining = 0;
-                _NextStartPosition += _ContentLength;
-            }
-                 
-            /*
-            Console.WriteLine("New values");
-            Console.WriteLine("  Next start             : " + _NextStartPosition);
-            Console.WriteLine("  Bytes remaining        : " + _BytesRemaining);  
-             */
-
-            return;
-        } 
+            _PreviousChunk = null;
+            _NextStartPosition = _ContentLength - _BytesRemaining;
+        }
 
         #endregion
 
         #region Private-Methods
 
-        private byte[] ReadBytesFromStream(Stream stream, long count, out int bytesRead)
+        private void ReadExactly(Stream stream, byte[] buffer, int offset, int count)
         {
-            bytesRead = 0;
-            byte[] data = new byte[count];
-
-            long bytesRemaining = count;
-
-            while (bytesRemaining > 0)
+            while (count > 0)
             {
-                int bytesReadCurr = stream.Read(data, 0, data.Length);
-                if (bytesReadCurr > 0)
-                {
-                    bytesRead += bytesReadCurr;
-                    bytesRemaining -= bytesReadCurr;
-                }
+                int bytesRead = stream.Read(buffer, offset, count);
+                if (bytesRead < 1)
+                    throw new EndOfStreamException(
+                        "Stream ended before the content length of " + _ContentLength + " bytes was reached; "
+                        + count + " bytes of the current chunk could not be read.");
+
+                offset += bytesRead;
+                count -= bytesRead;
             }
-
-            return data;
-        }
-
-        private byte[] ShiftLeft(byte[] data, int shiftCount, byte fill)
-        {
-            if (data == null || data.Length < 1) return null;
-            byte[] ret = InitBytes(data.Length, fill);
-            if (data.Length < shiftCount) return ret;
-
-            Buffer.BlockCopy(data, shiftCount, ret, 0, (data.Length - shiftCount));
-            return ret;
-        }
-
-        private byte[] ShiftRight(byte[] data, int shiftCount, byte fill)
-        {
-            if (data == null || data.Length < 1) return null;
-            byte[] ret = InitBytes(data.Length, fill);
-            if (data.Length < shiftCount) return ret;
-
-            Buffer.BlockCopy(data, 0, ret, shiftCount, (data.Length - shiftCount));
-            return ret;
-        }
-
-        private byte[] InitBytes(long count, byte val)
-        {
-            byte[] ret = new byte[count];
-            for (long i = 0; i < ret.Length; i++)
-            {
-                ret[i] = val;
-            }
-            return ret;
         }
 
         #endregion

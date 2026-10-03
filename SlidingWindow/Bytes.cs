@@ -66,14 +66,13 @@ namespace SlidingWindow
         }
 
         /// <summary>
-        /// Number of bytes remaining.
+        /// Number of bytes that have not yet been returned in any chunk.
         /// </summary>
         public int BytesRemaining
         {
             get
             {
-                if (_NextStartPosition == 0) return _Data.Length;
-                return _Data.Length - (_NextEndPosition - _ShiftSize);
+                return _Data.Length - _ReturnedEndPosition;
             }
         }
 
@@ -87,6 +86,7 @@ namespace SlidingWindow
          
         private int _NextStartPosition = 0;
         private int _NextEndPosition = 0;
+        private int _ReturnedEndPosition = 0;
 
         #endregion
 
@@ -105,7 +105,7 @@ namespace SlidingWindow
             if (chunkSize < 1) throw new ArgumentException("Chunk size must be at least one.");
             if (chunkSize > data.Length) throw new ArgumentException("Chunk size must not exceed data length.");
             if (shiftSize < 1) throw new ArgumentException("Shift size must be at least one.");
-            if (shiftSize > chunkSize) throw new ArgumentException("Shift size must be less than chunk size.");
+            if (shiftSize > chunkSize) throw new ArgumentException("Shift size must not exceed chunk size.");
 
             _Data = new byte[data.Length];
             Buffer.BlockCopy(data, 0, _Data, 0, data.Length);
@@ -115,6 +115,7 @@ namespace SlidingWindow
              
             _NextStartPosition = 0;
             _NextEndPosition = _NextStartPosition + _ChunkSize;
+            _ReturnedEndPosition = 0;
         }
 
         #endregion
@@ -138,139 +139,52 @@ namespace SlidingWindow
         /// Retrieve the next chunk.
         /// Chunks of size 'chunkSize' will be returned, unless fewer bytes remain.
         /// The final chunk will be of the remaining size.
+        /// Once the final chunk has been returned, subsequent calls return null.
         /// </summary>
-        /// <param name="position">Indicates the starting position of the chunk in the byte array.</param>
-        /// <param name="newData">Removing data from the previous chunk, new data found that was included in this chunk.</param>
-        /// <param name="finalChunk">Indicates if the chunk retrieved is the final chunk.</param>
-        /// <returns>Byte array containing chunk data.</returns>
+        /// <param name="position">Indicates the starting position of the chunk in the byte array, or -1 if no data remains.</param>
+        /// <param name="newData">Data included in this chunk that was not included in any previously returned chunk, or null if no data remains.</param>
+        /// <param name="finalChunk">Indicates if the chunk retrieved is the final chunk, or if no data remains.</param>
+        /// <returns>Byte array containing chunk data, or null if no data remains.</returns>
         public byte[] GetNextChunk(out long position, out byte[] newData, out bool finalChunk)
         {
-            position = -1;
-            byte[] ret = null;
-
-            if (_NextStartPosition == 0)
+            if (_ReturnedEndPosition >= _Data.Length || _NextStartPosition >= _Data.Length)
             {
-                #region First-Chunk
-
-                if (_ChunkSize > _Data.Length)
-                {
-                    #region Only-Chunk
-
-                    ret = new byte[_Data.Length];
-                    newData = new byte[_Data.Length];
-                    Buffer.BlockCopy(_Data, 0, ret, 0, _Data.Length);
-                    Buffer.BlockCopy(_Data, 0, newData, 0, _Data.Length);
-                    finalChunk = true;
-                    position = 0;
-                    _NextStartPosition += _ShiftSize;
-                    _NextEndPosition += _ShiftSize;
-                    return ret;
-
-                    #endregion
-                }
-                else
-                {
-                    #region Full-Chunk
-
-                    ret = new byte[_ChunkSize];
-                    newData = new byte[_ChunkSize];
-                    Buffer.BlockCopy(_Data, _NextStartPosition, ret, 0, _ChunkSize);
-                    Buffer.BlockCopy(_Data, _NextStartPosition, newData, 0, _ChunkSize);
-                    finalChunk = false;
-                    position = 0;
-                    _NextStartPosition += _ShiftSize;
-                    _NextEndPosition += _ShiftSize;
-                    return ret;
-
-                    #endregion
-                }
-
-                #endregion
+                position = -1;
+                newData = null;
+                finalChunk = true;
+                return null;
             }
-            else
-            {
-                #region Subsequent-Chunk
 
-                if (_NextStartPosition >= _Data.Length)
-                {
-                    #region End
+            int start = _NextStartPosition;
+            int end = Math.Min(start + _ChunkSize, _Data.Length);
+            int newDataStart = Math.Max(start, _ReturnedEndPosition);
 
-                    ret = null;
-                    newData = null;
-                    finalChunk = true;
-                    position = -1;
-                    return ret;
+            byte[] ret = new byte[end - start];
+            Buffer.BlockCopy(_Data, start, ret, 0, ret.Length);
 
-                    #endregion
-                }
-                else
-                {
-                    if (_NextEndPosition < _Data.Length)
-                    {
-                        #region Full-Chunk
+            newData = new byte[end - newDataStart];
+            Buffer.BlockCopy(_Data, newDataStart, newData, 0, newData.Length);
 
-                        ret = new byte[_ChunkSize];
-                        Buffer.BlockCopy(_Data, _NextStartPosition, ret, 0, _ChunkSize);
+            position = start;
+            finalChunk = (end >= _Data.Length);
 
-                        newData = new byte[_ShiftSize];
-                        int newDataStart = _NextEndPosition - _ShiftSize;
-                        Buffer.BlockCopy(_Data, newDataStart, newData, 0, _ShiftSize);
-                        finalChunk = false;
-                        position = _NextStartPosition;
-                        _NextStartPosition += _ShiftSize;
-                        _NextEndPosition += _ShiftSize;
-
-                        if (_NextStartPosition >= _Data.Length) finalChunk = true;
-
-                        return ret;
-
-                        #endregion
-                    }
-                    else
-                    {
-                        #region Partial-Chunk-and-End
-
-                        int windowLength = _Data.Length - _NextStartPosition; 
-                        position = _Data.Length - (_Data.Length - _NextStartPosition); 
-
-                        ret = new byte[windowLength];
-                        Buffer.BlockCopy(_Data, (int)position, ret, 0, windowLength);
-
-                        int newDataLength = _Data.Length - (_NextEndPosition - _ShiftSize); 
-                        int newDataPosition = _Data.Length - newDataLength; 
-                        newData = new byte[newDataLength];
-                        Buffer.BlockCopy(_Data, newDataPosition, newData, 0, newDataLength);
-
-                        finalChunk = true;
-                        _NextStartPosition += _ShiftSize;
-                        _NextEndPosition += _ShiftSize;
-                        return ret;
-
-                        #endregion
-                    }
-                }
-
-                #endregion
-            } 
+            _ReturnedEndPosition = end;
+            _NextStartPosition += _ShiftSize;
+            _NextEndPosition = _NextStartPosition + _ChunkSize;
+            return ret;
         }
 
         /// <summary>
-        /// Advance processing to the next new chunk.
+        /// Advance to the position starting after the end of the previous chunk.
+        /// Calling GetNextChunk() will then return a chunk full of new data.
+        /// Has no effect if no chunk has been retrieved.
         /// </summary>
         public void AdvanceToNewChunk()
         {
-            if (_NextStartPosition == 0) return;
+            if (_ReturnedEndPosition == 0) return;
 
-            int nextStartPosition = _NextStartPosition;
-            int nextEndPosition = _NextEndPosition;
-
-            int prevChunkStartPosition = _NextStartPosition - _ShiftSize;
-            int prevChunkEndPosition = _NextEndPosition - _ShiftSize;
-
-            _NextStartPosition = prevChunkStartPosition + _ChunkSize;
-            _NextEndPosition = prevChunkEndPosition + _ChunkSize;
-
-            return;
+            _NextStartPosition = _ReturnedEndPosition;
+            _NextEndPosition = _NextStartPosition + _ChunkSize;
         }
 
         #endregion 

@@ -14,10 +14,10 @@
     <RepositoryUrl>https://github.com/jchristn/slidingwindow</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>sliding window chunk byte array bytes</PackageTags>
-    <PackageReleaseNotes>Retargeted to netstandard2.0, netstandard2.1, net8.0, and net10.0.</PackageReleaseNotes>
+    <PackageReleaseNotes>Fixes for final chunk detection, Streams zero padding, partial stream reads, truncated stream hangs, and AdvanceToNewChunk data loss. GetNextChunk returns null after the final chunk.</PackageReleaseNotes>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageIcon>icon.png</PackageIcon>
-    <Version>1.0.8</Version>
+    <Version>1.1.0</Version>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
   </PropertyGroup>
 
