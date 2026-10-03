@@ -111,6 +111,11 @@ dotnet test Test.Nunit
 
 ```Test.Bytes``` and ```Test.Streams``` are interactive console applications for manually exploring the library.
 
+## New in v1.1.1
+
+- Test dependency updates: Touchstone 0.2.0, NUnit 5.0.0, NUnit3TestAdapter 6.3.0, NUnit.Analyzers 4.15.0, xunit.runner.visualstudio 4.0.0, Microsoft.NET.Test.Sdk 18.10.1, coverlet.collector 10.1.0
+- No changes to library behavior or public API
+
 ## New in v1.1.0
 
 - Correct ```finalChunk``` reporting when the last chunk ends exactly at the end of the data

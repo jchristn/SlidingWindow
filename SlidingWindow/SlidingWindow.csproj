@@ -14,10 +14,10 @@
     <RepositoryUrl>https://github.com/jchristn/slidingwindow</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>sliding window chunk byte array bytes</PackageTags>
-    <PackageReleaseNotes>Fixes for final chunk detection, Streams zero padding, partial stream reads, truncated stream hangs, and AdvanceToNewChunk data loss. GetNextChunk returns null after the final chunk.</PackageReleaseNotes>
+    <PackageReleaseNotes>Test dependency updates. v1.1.0: fixes for final chunk detection, Streams zero padding, partial stream reads, truncated stream hangs, and AdvanceToNewChunk data loss. GetNextChunk returns null after the final chunk.</PackageReleaseNotes>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageIcon>icon.png</PackageIcon>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
   </PropertyGroup>
 

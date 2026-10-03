@@ -2,6 +2,13 @@
 
 ## Current Version
 
+v1.1.1
+
+- Updated test dependencies: Touchstone.Core, Touchstone.Cli, Touchstone.XunitAdapter, Touchstone.NunitAdapter (0.1.12 -> 0.2.0), NUnit (4.3.2 -> 5.0.0), NUnit3TestAdapter (5.0.0 -> 6.3.0), NUnit.Analyzers (4.7.0 -> 4.15.0), xunit.runner.visualstudio (3.1.4 -> 4.0.0), Microsoft.NET.Test.Sdk (17.14.1 -> 18.10.1), coverlet.collector (6.0.4 -> 10.1.0)
+- No changes to library behavior or public API
+
+## Previous Versions
+
 v1.1.0
 
 - `finalChunk` is now `true` whenever the returned chunk ends at the end of the data, including when `chunkSize` equals the data length or the last window ends exactly on the boundary
