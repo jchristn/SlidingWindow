@@ -8,17 +8,20 @@
     <Authors>Joel Christner</Authors>
     <Company>Joel Christner</Company>
     <Description>SlidingWindow provides an interface to retrieve chunks from a byte array using a sliding window.</Description>
-    <Copyright>(c)2021 Joel Christner</Copyright>
-    <PackageLicenseUrl></PackageLicenseUrl>
+    <Copyright>(c)2026 Joel Christner</Copyright>
     <PackageProjectUrl>https://github.com/jchristn/slidingwindow</PackageProjectUrl>
     <RepositoryUrl>https://github.com/jchristn/slidingwindow</RepositoryUrl>
-    <RepositoryType>Github</RepositoryType>
+    <RepositoryType>git</RepositoryType>
     <PackageTags>sliding window chunk byte array bytes</PackageTags>
     <PackageReleaseNotes>Test dependency updates. v1.1.0: fixes for final chunk detection, Streams zero padding, partial stream reads, truncated stream hangs, and AdvanceToNewChunk data loss. GetNextChunk returns null after the final chunk.</PackageReleaseNotes>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageIcon>icon.png</PackageIcon>
-    <Version>1.1.1</Version>
+    <Version>1.1.2</Version>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,6 +33,10 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" Visible="false" />
   </ItemGroup>
 
 </Project>
